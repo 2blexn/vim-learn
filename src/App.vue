@@ -12,7 +12,7 @@ import FooterSection from './components/FooterSection.vue'
 const activeSection = ref('hero')
 const isLoaded = ref(false)
 
-// Ініціалізуємо Vim-клавіші для скролу
+// Initialize Vim keys for scrolling
 useVimKeys()
 
 // i18n

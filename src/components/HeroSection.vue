@@ -6,7 +6,6 @@ const { t, locale } = inject('i18n')
 const typingComplete = ref(false)
 const isInitialLoad = ref(true)
 
-// Computed для рядків терміналу - автоматично оновлюється при зміні мови
 const terminalLines = computed(() => [
   { type: 'command', text: '$ vim --version' },
   { type: 'output', text: t('hero.terminalLines.version') },
@@ -23,7 +22,6 @@ const terminalLines = computed(() => [
   { type: 'prompt', text: '$ _' }
 ])
 
-// Для анімації показуємо рядки поступово тільки при першому завантаженні
 const visibleLines = ref(0)
 
 onMounted(() => {
@@ -39,7 +37,6 @@ onMounted(() => {
   })
 })
 
-// Коли змінюється мова після завантаження - показуємо всі рядки одразу
 watch(locale, () => {
   if (!isInitialLoad.value) {
     visibleLines.value = terminalLines.value.length
