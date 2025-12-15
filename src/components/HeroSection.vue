@@ -1,38 +1,49 @@
 <script setup>
-import { ref, onMounted, inject, computed } from 'vue'
+import { ref, onMounted, inject, computed, watch } from 'vue'
 
 const { t, locale } = inject('i18n')
 
-const lines = ref([])
-const showCursor = ref(true)
 const typingComplete = ref(false)
+const isInitialLoad = ref(true)
 
-const getTerminalLines = () => [
-  { type: 'command', text: '$ vim --version', delay: 0 },
-  { type: 'output', text: t('hero.terminalLines.version'), delay: 400 },
-  { type: 'output', text: t('hero.terminalLines.compiled'), delay: 600 },
-  { type: 'empty', text: '', delay: 700 },
-  { type: 'command', text: t('hero.terminalLines.cat'), delay: 900 },
-  { type: 'header', text: '╔══════════════════════════════════════════╗', delay: 1100 },
-  { type: 'header', text: `║     🚀 ${t('hero.welcome')}    ║`, delay: 1200 },
-  { type: 'header', text: '╚══════════════════════════════════════════╝', delay: 1300 },
-  { type: 'empty', text: '', delay: 1400 },
-  { type: 'info', text: t('hero.terminalLines.interactive'), delay: 1600 },
-  { type: 'info', text: t('hero.terminalLines.learn'), delay: 1800 },
-  { type: 'empty', text: '', delay: 1900 },
-  { type: 'prompt', text: '$ _', delay: 2000 }
-]
+// Computed для рядків терміналу - автоматично оновлюється при зміні мови
+const terminalLines = computed(() => [
+  { type: 'command', text: '$ vim --version' },
+  { type: 'output', text: t('hero.terminalLines.version') },
+  { type: 'output', text: t('hero.terminalLines.compiled') },
+  { type: 'empty', text: '' },
+  { type: 'command', text: t('hero.terminalLines.cat') },
+  { type: 'header', text: '╔══════════════════════════════════════════╗' },
+  { type: 'header', text: `║     🚀 ${t('hero.welcome')}    ║` },
+  { type: 'header', text: '╚══════════════════════════════════════════╝' },
+  { type: 'empty', text: '' },
+  { type: 'info', text: t('hero.terminalLines.interactive') },
+  { type: 'info', text: t('hero.terminalLines.learn') },
+  { type: 'empty', text: '' },
+  { type: 'prompt', text: '$ _' }
+])
+
+// Для анімації показуємо рядки поступово тільки при першому завантаженні
+const visibleLines = ref(0)
 
 onMounted(() => {
-  const terminalLines = getTerminalLines()
-  terminalLines.forEach((line, index) => {
+  const delays = [0, 400, 600, 700, 900, 1100, 1200, 1300, 1400, 1600, 1800, 1900, 2000]
+  delays.forEach((delay, index) => {
     setTimeout(() => {
-      lines.value.push(line)
-      if (index === terminalLines.length - 1) {
+      visibleLines.value = index + 1
+      if (index === delays.length - 1) {
         typingComplete.value = true
+        isInitialLoad.value = false
       }
-    }, line.delay)
+    }, delay)
   })
+})
+
+// Коли змінюється мова після завантаження - показуємо всі рядки одразу
+watch(locale, () => {
+  if (!isInitialLoad.value) {
+    visibleLines.value = terminalLines.value.length
+  }
 })
 
 const scrollToSection = (id) => {
@@ -55,8 +66,8 @@ const scrollToSection = (id) => {
         </div>
         <div class="terminal-body">
           <div 
-            v-for="(line, index) in lines" 
-            :key="index"
+            v-for="(line, index) in terminalLines.slice(0, visibleLines)" 
+            :key="`${locale}-${index}`"
             class="terminal-line"
             :class="line.type"
           >
