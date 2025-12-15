@@ -480,7 +480,6 @@ onMounted(() => {
               :placeholder="t('practice.inputPlaceholder')"
               @keydown="handleKeydown"
               :disabled="isTestComplete"
-              autofocus
             >
             <span class="cursor-block">█</span>
           </div>
